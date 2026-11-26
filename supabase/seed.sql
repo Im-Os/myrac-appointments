@@ -10,7 +10,7 @@ do $$
 declare v_id uuid;
 begin
   insert into talleres (nombre, slug, zona_horaria, bahias_total, intervalo_min, cupo_por_bloque, confirmacion_automatica)
-  values ('MYRAC', 'myrac', 'America/Mexico_City', 7, 30, 3, true)
+  values ('MYRAC', 'myrac', 'America/Mexico_City', 7, 30, 3, false)
   on conflict (slug) do nothing
   returning id into v_id;
 
