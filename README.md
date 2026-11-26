@@ -31,10 +31,10 @@ Un bloque de horario se ofrece si:
 | Duración del bloque de recepción | `intervalo_min` | 30 min |
 | Autos recibidos por bloque | `cupo_por_bloque` | 3 |
 | Días máximos de anticipación | `dias_anticipacion_max` | 30 |
-| Confirmación automática de citas | `confirmacion_automatica` | activada |
+| Confirmación automática de citas | `confirmacion_automatica` | desactivada (valor inicial de todos los talleres) |
 | Horario por día | tabla `horario_taller` | L–V 9–18, S 9–14 |
 
-**Confirmación automática**
+**Confirmación automática** — por defecto viene desactivada; al crear la cuenta, la app le muestra al taller que puede activarla.
 - Activada: la cita en línea nace *confirmada*.
 - Desactivada: nace *pendiente*; el taller la confirma (`confirmar_cita`) o la cancela. Si el cliente la reprograma, vuelve a *pendiente*.
 - En los dos casos la cita aparta su cupo y su bahía desde que se crea, para que no haya sobrecupo mientras el taller la revisa.

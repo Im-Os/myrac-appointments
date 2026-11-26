@@ -6,6 +6,10 @@
 -- En ambos casos la cita aparta su lugar desde que se crea: una cita pendiente
 -- ocupa cupo y bahía igual que una confirmada, para evitar sobrecupo.
 
+-- Valor inicial: confirmación a mano (decisión de Oscar, 26-nov-2026).
+-- Al crear la cuenta, la app sugiere que se puede activar la confirmación automática.
+alter table talleres alter column confirmacion_automatica set default false;
+
 comment on column talleres.confirmacion_automatica is
   'Configuración del negocio: true = las citas en línea se confirman solas; false = el taller las confirma a mano.';
 
