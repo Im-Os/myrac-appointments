@@ -3,9 +3,33 @@
 Plataforma web de citas para talleres automotrices: el cliente ve los horarios con espacio real y el taller administra su agenda y sus bahías. Producto de MYRAC OS, diseñado para integrarse con él más adelante.
 
 ## Stack
-- **Next.js** (app web responsiva, instalable como PWA): en construcción
-- **Supabase**: PostgreSQL, autenticación y tiempo real
+- **Next.js 16** (App Router, TypeScript, Tailwind CSS 4): app web responsiva, instalable como PWA
+- **Supabase**: PostgreSQL, autenticación y tiempo real. La app habla con Supabase desde el navegador; la seguridad la dan las reglas RLS.
+- **Vercel**: publicación
 - **Stripe**: suscripciones de los talleres (fase posterior)
+
+## App (`src/`)
+| Ruta | Para quién | Qué hace |
+|---|---|---|
+| `/` | Talleres | Presentación del producto |
+| `/registro`, `/entrar` | Talleres | Crear cuenta / iniciar sesión |
+| `/alta` | Talleres | Registrar un taller nuevo (nombre, capacidad, horario, confirmación) o entrar con código de acceso |
+| `/panel` | Equipo | Agenda del día y de la semana, citas por confirmar, detalle de cita, recibir auto |
+| `/panel/citas/nueva` | Equipo | Cita por teléfono/mostrador o auto que llega sin cita |
+| `/panel/bahias` | Equipo | Tablero de bahías: estado, fecha de entrega, mover, entregar |
+| `/panel/servicios` | Dueño | Catálogo: activar, tipo (deja el auto / mientras espera), categorías |
+| `/panel/equipo` | Equipo | Miembros y roles |
+| `/panel/configuracion` | Dueño | Página de citas + QR, datos y color de marca, capacidad, confirmación automática, horario, bloqueos |
+| `/panel/suscripcion` | Dueño | Estado de la prueba / plan |
+| `/[slug]` | Clientes | Página pública de reservas con los colores del taller |
+| `/cita/[token]` | Clientes | Ver, agregar al calendario, cambiar o cancelar su cita |
+
+### Desarrollo local
+```bash
+cp .env.example .env.local   # datos públicos de Supabase
+npm install
+npm run dev
+```
 
 ## Base de datos (`supabase/`)
 | Archivo | Contenido |
