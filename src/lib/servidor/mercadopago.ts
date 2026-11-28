@@ -16,7 +16,7 @@ export type Preapproval = {
 };
 
 function token() {
-  const t = process.env.MERCADOPAGO_ACCESS_TOKEN;
+  const t = process.env.MERCADOPAGO_ACCESS_TOKEN?.trim();
   if (!t) throw new Error("Falta MERCADOPAGO_ACCESS_TOKEN en el servidor");
   return t;
 }
