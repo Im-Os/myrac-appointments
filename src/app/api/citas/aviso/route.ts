@@ -14,7 +14,7 @@ type Fila = {
   cliente: { nombre: string; email: string | null } | null;
   vehiculo: { marca: string; modelo: string; anio: number | null } | null;
   servicio: { nombre: string } | null;
-  taller: { nombre: string; color_marca: string; zona_horaria: string; direccion: string | null } | null;
+  taller: { nombre: string; color_marca: string; logo_url: string | null; zona_horaria: string; direccion: string | null } | null;
 };
 
 const TEXTOS = {
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     const { data } = await db
       .from("citas")
       .select(
-        "id,inicio,estado,token_cliente,aviso_estado,aviso_inicio,cliente:clientes(nombre,email),vehiculo:vehiculos(marca,modelo,anio),servicio:servicios(nombre),taller:talleres(nombre,color_marca,zona_horaria,direccion)",
+        "id,inicio,estado,token_cliente,aviso_estado,aviso_inicio,cliente:clientes(nombre,email),vehiculo:vehiculos(marca,modelo,anio),servicio:servicios(nombre),taller:talleres(nombre,color_marca,logo_url,zona_horaria,direccion)",
       )
       .eq("token_cliente", token)
       .maybeSingle();
@@ -61,6 +61,7 @@ export async function POST(req: Request) {
       vehiculo: [c.vehiculo?.marca, c.vehiculo?.modelo, c.vehiculo?.anio].filter(Boolean).join(" "),
       enlace: `${origen}/cita/${c.token_cliente}`,
       direccion: c.taller.direccion,
+      logo: c.taller.logo_url,
     });
     const asunto = `${cambioHorario ? "Nuevo horario de tu cita" : t.asunto} · ${c.taller.nombre}`;
     const ok = await enviarCorreo(c.cliente.email, asunto, html);

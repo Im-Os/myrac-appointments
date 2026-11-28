@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import QRCode from "qrcode";
 import { CalendarOff, Copy, Download, ExternalLink, Hand, Plus, Trash2, Zap } from "lucide-react";
 import { usePanel } from "@/components/panel-contexto";
+import { SubirLogo } from "@/components/subir-logo";
 import { EditorHorario, editorAHorario, horarioAEditor, horarioValido } from "@/components/editor-horario";
 import type { DiaHorario } from "@/components/editor-horario";
 import { Area, Aviso, Boton, Campo, Cargando, EncabezadoPagina, Entrada, Interruptor, Numero, Selector, Tarjeta, Vacio, cx, useAvisos } from "@/components/ui";
@@ -138,6 +139,7 @@ function Negocio() {
   return (
     <Seccion id="negocio" titulo="Datos del negocio" descripcion="Lo que ven tus clientes en tu página.">
       <Tarjeta className="space-y-4 p-5">
+        <SubirLogo />
         <div className="grid gap-4 sm:grid-cols-2">
           <Campo etiqueta="Nombre del taller">
             <Entrada value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} />

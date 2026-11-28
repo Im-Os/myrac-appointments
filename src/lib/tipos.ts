@@ -9,6 +9,7 @@ export type MiTaller = {
   slug: string;
   rol: Rol;
   color_marca: string;
+  logo_url: string | null;
   zona_horaria: string;
 };
 
@@ -20,6 +21,7 @@ export type Taller = {
   direccion: string | null;
   descripcion: string | null;
   color_marca: string;
+  logo_url: string | null;
   zona_horaria: string;
   bahias_total: number;
   intervalo_min: number;
@@ -37,6 +39,7 @@ export type TallerPublico = Pick<
   | "direccion"
   | "descripcion"
   | "color_marca"
+  | "logo_url"
   | "zona_horaria"
   | "intervalo_min"
   | "dias_anticipacion_max"

@@ -27,13 +27,18 @@ export function plantillaCita(o: {
   vehiculo: string;
   enlace: string;
   direccion?: string | null;
+  logo?: string | null;
 }) {
   const fila = (k: string, v: string) =>
     `<tr><td style="padding:6px 0;color:#71717a;font-size:14px;width:110px">${k}</td><td style="padding:6px 0;font-size:15px;color:#18181b">${esc(v)}</td></tr>`;
   return `<!doctype html><html><body style="margin:0;background:#f6f6f7;font-family:Arial,Helvetica,sans-serif">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e4e4e7">
-<tr><td style="background:#18181b;padding:20px 24px;color:#fff;font-size:18px;font-weight:bold"><span style="display:inline-block;width:10px;height:10px;border-radius:5px;background:${o.color};margin-right:8px"></span>${esc(o.taller)}</td></tr>
+<tr><td style="background:#18181b;padding:20px 24px;color:#fff;font-size:18px;font-weight:bold">${
+    o.logo
+      ? `<img src="${o.logo}" alt="" width="36" height="36" style="vertical-align:middle;border-radius:8px;background:#fff;padding:3px;margin-right:10px;object-fit:contain">`
+      : `<span style="display:inline-block;width:10px;height:10px;border-radius:5px;background:${o.color};margin-right:8px"></span>`
+  }${esc(o.taller)}</td></tr>
 <tr><td style="padding:24px">
 <p style="margin:0 0 6px;font-size:20px;font-weight:bold;color:#18181b">${esc(o.titulo)}</p>
 <p style="margin:0 0 18px;font-size:15px;color:#3f3f46">${esc(o.texto)}</p>

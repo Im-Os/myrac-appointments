@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { ProveedorPanel, usePanel } from "@/components/panel-contexto";
 import { Cargando, Logo, ProveedorAvisos, cx } from "@/components/ui";
+import { LogoTaller } from "@/components/logo-taller";
 import { estiloMarca } from "@/lib/estados";
 import { supabase } from "@/lib/supabase";
 
@@ -70,9 +71,9 @@ function Marco({ children }: { children: ReactNode }) {
         <button onClick={() => setMenu(true)} className="grid size-9 place-items-center rounded-xl text-zinc-700 hover:bg-zinc-100" aria-label="Abrir menú">
           <Menu className="size-5" />
         </button>
-        <span className="flex items-center gap-2 truncate font-semibold">
-          <span className="size-2.5 rounded-full bg-brand" />
-          {taller.nombre}
+        <span className="flex min-w-0 items-center gap-2 truncate font-semibold">
+          <LogoTaller nombre={taller.nombre} logo={taller.logo_url} className="size-7 rounded-lg text-xs" />
+          <span className="truncate">{taller.nombre}</span>
         </span>
         <Link href="/panel/citas/nueva" className="grid size-9 place-items-center rounded-xl bg-brand text-brand-ink" aria-label="Nueva cita">
           <Plus className="size-5" />
@@ -104,9 +105,7 @@ function Lateral({ alNavegar }: { alNavegar?: () => void }) {
           onClick={() => talleres.length > 1 && setSelector((v) => !v)}
           className="flex w-full items-center gap-3 rounded-xl bg-white/5 px-3 py-2.5 text-left ring-1 ring-white/10 hover:bg-white/10"
         >
-          <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-ink">
-            {taller.nombre.slice(0, 1).toUpperCase()}
-          </span>
+          <LogoTaller nombre={taller.nombre} logo={taller.logo_url} className="size-9 rounded-lg text-sm" />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-semibold text-white">{taller.nombre}</span>
             <span className="block truncate text-xs text-zinc-400">/{taller.slug}</span>
@@ -125,7 +124,11 @@ function Lateral({ alNavegar }: { alNavegar?: () => void }) {
                 }}
                 className={cx("flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm hover:bg-white/10", t.taller_id === taller.id && "text-white")}
               >
-                <span className="size-2 rounded-full" style={{ background: t.color_marca }} />
+                {t.logo_url ? (
+                  <img src={t.logo_url} alt="" className="size-5 rounded bg-white object-contain p-0.5" />
+                ) : (
+                  <span className="size-2 rounded-full" style={{ background: t.color_marca }} />
+                )}
                 {t.nombre}
               </button>
             ))}

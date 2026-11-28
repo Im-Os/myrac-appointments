@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { MapPin, MessageCircle, Phone } from "lucide-react";
 import { estiloMarca } from "@/lib/estados";
+import { LogoTaller } from "@/components/logo-taller";
 import { enlaceWhatsApp, telefonoBonito } from "@/lib/fechas";
 import type { TallerPublico } from "@/lib/tipos";
 
@@ -13,9 +14,7 @@ export function MarcoPublico({ taller, children }: { taller: TallerPublico; chil
         <div className="absolute inset-0 opacity-60" style={{ background: `radial-gradient(80% 120% at 100% 0%, ${taller.color_marca}, transparent 60%)` }} />
         <div className="relative mx-auto max-w-2xl px-5 pb-8 pt-8">
           <div className="flex items-center gap-3">
-            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand text-xl font-bold text-brand-ink shadow-lg">
-              {taller.nombre.slice(0, 1).toUpperCase()}
-            </span>
+            <LogoTaller nombre={taller.nombre} logo={taller.logo_url} className="size-14 rounded-2xl text-xl shadow-lg" />
             <div className="min-w-0">
               <h1 className="truncate text-xl font-semibold tracking-tight sm:text-2xl">{taller.nombre}</h1>
               <p className="text-sm text-white/70">Agenda tu cita en línea</p>
