@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
   CalendarDays,
@@ -17,6 +17,7 @@ import {
   Wrench,
   Menu,
   X,
+  ShieldCheck,
 } from "lucide-react";
 import { ProveedorPanel, usePanel } from "@/components/panel-contexto";
 import { Cargando, Logo, ProveedorAvisos, cx } from "@/components/ui";
@@ -175,6 +176,7 @@ function Lateral({ alNavegar }: { alNavegar?: () => void }) {
           <ExternalLink className="size-[18px]" />
           Mi página de citas
         </a>
+        <EnlaceAdmin />
       </nav>
 
       <div className="border-t border-white/10 p-3">
@@ -221,5 +223,22 @@ function BarraInferior() {
         })}
       </div>
     </nav>
+  );
+}
+
+/** Solo aparece si la cuenta es administradora de la plataforma. */
+function EnlaceAdmin() {
+  const [admin, setAdmin] = useState(false);
+  useEffect(() => {
+    supabase()
+      .rpc("soy_admin_plataforma")
+      .then(({ data }) => setAdmin(data === true));
+  }, []);
+  if (!admin) return null;
+  return (
+    <Link href="/admin" className="mt-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] font-medium text-zinc-400 ring-1 ring-white/10 hover:bg-white/5 hover:text-zinc-100">
+      <ShieldCheck className="size-[18px] text-[#E11D2E]" />
+      Admin plataforma
+    </Link>
   );
 }
