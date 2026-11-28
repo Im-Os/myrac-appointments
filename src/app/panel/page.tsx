@@ -5,8 +5,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { CalendarPlus, Check, ChevronLeft, ChevronRight, Copy, PartyPopper, X, Clock, Warehouse, CalendarCheck2 } from "lucide-react";
 import { usePanel } from "@/components/panel-contexto";
-import { DetalleCita, SELECT_CITA, TarjetaCita, nombreVehiculo } from "@/components/citas";
-import { Boton, Cargando, Tarjeta, Vacio, cx, useAvisos } from "@/components/ui";
+import { AvisoConfirmada, DetalleCita, SELECT_CITA, TarjetaCita, nombreVehiculo } from "@/components/citas";
+import { avisarCliente } from "@/lib/avisos";
+import { Aviso, Boton, Cargando, Tarjeta, Vacio, cx, useAvisos } from "@/components/ui";
 import {
   aInstante,
   diaClave,
@@ -28,8 +29,9 @@ import type { CitaAgenda } from "@/lib/tipos";
 type Vista = "dia" | "semana";
 
 export default function Agenda() {
-  const { taller } = usePanel();
+  const { taller, esDueno } = usePanel();
   const tz = taller.zona_horaria;
+  const [aviso, setAviso] = useState<{ dias: number; vigente: boolean } | null>(null);
   const avisar = useAvisos();
   const [vista, setVista] = useState<Vista>("dia");
   const [dia, setDia] = useState(() => hoyClave(tz));
@@ -39,10 +41,28 @@ export default function Agenda() {
   const [abierta, setAbierta] = useState<CitaAgenda | null>(null);
   const [bienvenida, setBienvenida] = useState(false);
   const [verCanceladas, setVerCanceladas] = useState(false);
+  const [recienConfirmada, setRecienConfirmada] = useState<CitaAgenda | null>(null);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("bienvenida")) setBienvenida(true);
   }, []);
+
+  // Aviso de suscripción: prueba por terminar o citas en línea pausadas.
+  useEffect(() => {
+    if (!esDueno) return;
+    supabase()
+      .from("suscripciones")
+      .select("estado,vence_en,mp_estado")
+      .eq("taller_id", taller.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        const restante = data.vence_en ? (new Date(data.vence_en).getTime() - Date.now()) / 86400e3 : Infinity;
+        const vigente = (data.estado === "prueba" || data.estado === "activa") && restante > 0;
+        const porVencer = vigente && data.mp_estado !== "authorized" && restante <= 7;
+        if (!vigente || porVencer) setAviso({ dias: Math.max(0, Math.ceil(restante)), vigente });
+      });
+  }, [esDueno, taller.id]);
 
   const rango = useMemo(() => {
     const desde = vista === "dia" ? dia : inicioSemana(dia);
@@ -98,6 +118,8 @@ export default function Agenda() {
     const { error } = await supabase().rpc("confirmar_cita", { p_cita_id: c.id });
     if (error) return avisar(mensajeError(error), "error");
     avisar("Cita confirmada");
+    avisarCliente(c.token_cliente);
+    setRecienConfirmada({ ...c, estado: "confirmada" });
     cargar();
   }
 
@@ -138,6 +160,19 @@ export default function Agenda() {
             </Link>
           </div>
         </Tarjeta>
+      )}
+
+      {aviso && (
+        <Aviso tono={aviso.vigente ? "alerta" : "error"} className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <span>
+            {aviso.vigente
+              ? `Tu periodo de prueba termina en ${aviso.dias} ${aviso.dias === 1 ? "día" : "días"}. Suscríbete para no pausar tus citas en línea.`
+              : "Tu página de citas está pausada: no hay una suscripción vigente."}
+          </span>
+          <Link href="/panel/suscripcion" className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800">
+            Ver planes
+          </Link>
+        </Aviso>
       )}
 
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
@@ -280,6 +315,7 @@ export default function Agenda() {
       )}
 
       <DetalleCita cita={abierta} onCerrar={() => setAbierta(null)} onCambio={cargar} />
+      {recienConfirmada && <AvisoConfirmada abierto cita={recienConfirmada} onCerrar={() => setRecienConfirmada(null)} />}
     </div>
   );
 }

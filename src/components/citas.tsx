@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Ban, Car, Check, MessageCircle, Phone, UserX, Warehouse, Globe, Store } from "lucide-react";
+import { Ban, Car, Check, CheckCircle2, MessageCircle, Phone, Send, UserX, Warehouse, Globe, Store } from "lucide-react";
+import { avisarCliente, whatsappConfirmacion } from "@/lib/avisos";
 import { Aviso, Boton, Campo, Entrada, Insignia, Modal, cx, useAvisos } from "@/components/ui";
 import { usePanel } from "@/components/panel-contexto";
 import { ESTADO_CITA } from "@/lib/estados";
@@ -10,7 +11,7 @@ import { mensajeError, supabase } from "@/lib/supabase";
 import type { CitaAgenda } from "@/lib/tipos";
 
 export const SELECT_CITA =
-  "id,inicio,estado,origen,notas,creado_en,cliente:clientes(id,nombre,telefono,email),vehiculo:vehiculos(id,marca,modelo,anio,placas),servicio:servicios(id,nombre,tipo)";
+  "id,inicio,estado,origen,notas,creado_en,token_cliente,cliente:clientes(id,nombre,telefono,email),vehiculo:vehiculos(id,marca,modelo,anio,placas),servicio:servicios(id,nombre,tipo)";
 
 export function nombreVehiculo(v: CitaAgenda["vehiculo"]) {
   if (!v) return "Vehículo";
@@ -58,6 +59,7 @@ export function DetalleCita({ cita, onCerrar, onCambio }: { cita: CitaAgenda | n
   const avisar = useAvisos();
   const [ocupado, setOcupado] = useState<string | null>(null);
   const [recibir, setRecibir] = useState(false);
+  const [avisarWa, setAvisarWa] = useState(false);
   if (!cita) return null;
 
   const e = ESTADO_CITA[cita.estado];
@@ -70,8 +72,10 @@ export function DetalleCita({ cita, onCerrar, onCambio }: { cita: CitaAgenda | n
     setOcupado(null);
     if (error) return avisar(mensajeError(error), "error");
     avisar(exito);
+    if (nombre === "confirmar" || nombre === "cancelar") avisarCliente(cita!.token_cliente);
     onCambio();
-    onCerrar();
+    if (nombre === "confirmar") setAvisarWa(true);
+    else onCerrar();
   }
 
   const sb = supabase();
@@ -83,7 +87,7 @@ export function DetalleCita({ cita, onCerrar, onCambio }: { cita: CitaAgenda | n
   return (
     <>
       <Modal
-        abierto={!recibir}
+        abierto={!recibir && !avisarWa}
         onCerrar={onCerrar}
         titulo={
           <span className="flex items-center gap-2">
@@ -173,13 +177,22 @@ export function DetalleCita({ cita, onCerrar, onCambio }: { cita: CitaAgenda | n
               {telefonoBonito(tel)}
               {cita.cliente?.email && ` · ${cita.cliente.email}`}
             </p>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
+              {cita.estado === "confirmada" && (
+                <a
+                  href={whatsappConfirmacion({ telefono: tel, cliente: cita.cliente?.nombre, taller: taller.nombre, inicio: cita.inicio, tz, servicio: cita.servicio?.nombre, token: cita.token_cliente })}
+                  target="_blank"
+                  className="inline-flex h-9 items-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-700"
+                >
+                  <Send className="size-4" /> Enviar confirmación
+                </a>
+              )}
               <a
                 href={enlaceWhatsApp(tel, textoWa)}
                 target="_blank"
-                className="inline-flex h-9 items-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-700"
+                className="inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3 text-sm font-medium ring-1 ring-line hover:bg-zinc-50"
               >
-                <MessageCircle className="size-4" /> WhatsApp
+                <MessageCircle className="size-4 text-emerald-600" /> WhatsApp
               </a>
               <a href={`tel:${tel}`} className="inline-flex h-9 items-center gap-2 rounded-xl bg-white px-3 text-sm font-medium ring-1 ring-line hover:bg-zinc-50">
                 <Phone className="size-4" /> Llamar
@@ -188,6 +201,14 @@ export function DetalleCita({ cita, onCerrar, onCambio }: { cita: CitaAgenda | n
           </div>
         </div>
       </Modal>
+      <AvisoConfirmada
+        abierto={avisarWa}
+        cita={cita}
+        onCerrar={() => {
+          setAvisarWa(false);
+          onCerrar();
+        }}
+      />
       <ModalRecibir
         abierto={recibir}
         citaId={cita.id}
@@ -199,6 +220,37 @@ export function DetalleCita({ cita, onCerrar, onCambio }: { cita: CitaAgenda | n
         }}
       />
     </>
+  );
+}
+
+/** Tras confirmar: un toque para avisar al cliente por WhatsApp (el correo se manda solo si dejó correo). */
+export function AvisoConfirmada({ abierto, cita, onCerrar }: { abierto: boolean; cita: CitaAgenda; onCerrar: () => void }) {
+  const { taller } = usePanel();
+  const tel = cita.cliente?.telefono ?? "";
+  return (
+    <Modal abierto={abierto} onCerrar={onCerrar} titulo="Cita confirmada" ancho="max-w-md">
+      <div className="flex flex-col items-center text-center">
+        <div className="grid size-14 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+          <CheckCircle2 className="size-8" />
+        </div>
+        <p className="mt-3 text-[17px] font-semibold">Avísale a {cita.cliente?.nombre?.split(" ")[0] ?? "tu cliente"}</p>
+        <p className="mt-1 text-sm text-muted">
+          Se abrirá WhatsApp con el mensaje listo; solo toca enviar.
+          {cita.cliente?.email ? " También le llega un correo automático." : ""}
+        </p>
+        <a
+          href={whatsappConfirmacion({ telefono: tel, cliente: cita.cliente?.nombre, taller: taller.nombre, inicio: cita.inicio, tz: taller.zona_horaria, servicio: cita.servicio?.nombre, token: cita.token_cliente })}
+          target="_blank"
+          onClick={() => setTimeout(onCerrar, 300)}
+          className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-[15px] font-semibold text-white hover:bg-emerald-700"
+        >
+          <Send className="size-5" /> Avisar por WhatsApp
+        </a>
+        <button onClick={onCerrar} className="mt-3 text-sm text-muted hover:text-zinc-900">
+          Ahora no
+        </button>
+      </div>
+    </Modal>
   );
 }
 

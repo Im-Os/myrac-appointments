@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarCheck2, Car, Gauge, Link2, ShieldCheck, Smartphone, Warehouse } from "lucide-react";
 import { Logo } from "@/components/ui";
+import { LugaresFundador } from "@/components/lugares-fundador";
 
 const PUNTOS = [
   {
@@ -128,6 +129,30 @@ export default function Inicio() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 pt-16 text-center">
+          <h2 className="text-3xl font-semibold tracking-tight">Un solo plan, todo incluido</h2>
+          <p className="mt-2 text-zinc-600">30 días gratis, sin tarjeta. Cancela cuando quieras.</p>
+          <div className="mx-auto mt-8 grid max-w-2xl gap-4 sm:grid-cols-2">
+            <div className="rounded-3xl bg-white p-6 text-left ring-1 ring-zinc-200">
+              <p className="font-semibold">Plus mensual</p>
+              <p className="mt-2 text-4xl font-semibold tracking-tight">
+                $299<span className="text-base font-normal text-zinc-500"> MXN/mes</span>
+              </p>
+            </div>
+            <div className="rounded-3xl bg-zinc-950 p-6 text-left text-white ring-1 ring-zinc-800">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold">Plus anual</p>
+                <span className="rounded-full bg-[#E11D2E] px-2 py-0.5 text-xs font-semibold">2 meses gratis</span>
+              </div>
+              <p className="mt-2 text-4xl font-semibold tracking-tight">
+                $2,990<span className="text-base font-normal text-zinc-400"> MXN/año</span>
+              </p>
+            </div>
+          </div>
+          <LugaresFundador />
+          <p className="mt-4 text-sm text-zinc-500">Pagos seguros con Mercado Pago.</p>
         </section>
 
         <section className="mx-auto max-w-6xl px-5 py-16">

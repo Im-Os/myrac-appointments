@@ -9,6 +9,7 @@ export type MiTaller = {
   slug: string;
   rol: Rol;
   color_marca: string;
+  logo_url: string | null;
   zona_horaria: string;
 };
 
@@ -20,6 +21,7 @@ export type Taller = {
   direccion: string | null;
   descripcion: string | null;
   color_marca: string;
+  logo_url: string | null;
   zona_horaria: string;
   bahias_total: number;
   intervalo_min: number;
@@ -37,6 +39,7 @@ export type TallerPublico = Pick<
   | "direccion"
   | "descripcion"
   | "color_marca"
+  | "logo_url"
   | "zona_horaria"
   | "intervalo_min"
   | "dias_anticipacion_max"
@@ -65,6 +68,7 @@ export type CitaAgenda = {
   origen: "web" | "taller";
   notas: string | null;
   creado_en: string;
+  token_cliente: string;
   cliente: { id: string; nombre: string; telefono: string; email: string | null } | null;
   vehiculo: { id: string; marca: string; modelo: string; anio: number | null; placas: string | null } | null;
   servicio: { id: string; nombre: string; tipo: TipoServicio } | null;

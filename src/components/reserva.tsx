@@ -8,6 +8,7 @@ import { SelectorHorario } from "@/components/selector-horario";
 import { Area, Aviso, Boton, Campo, Cargando, Entrada, Tarjeta, Vacio, cx } from "@/components/ui";
 import { diaClave, enlaceWhatsApp, fechaLarga, hora, mayus } from "@/lib/fechas";
 import { mensajeError, supabase } from "@/lib/supabase";
+import { avisarCliente } from "@/lib/avisos";
 import type { Categoria, Servicio, TallerPublico } from "@/lib/tipos";
 
 type Paso = "servicio" | "horario" | "datos";
@@ -101,6 +102,7 @@ export function Reserva({ slug }: { slug: string }) {
       return;
     }
     const fila = (data as { token: string }[])[0];
+    avisarCliente(fila.token);
     router.push(`/cita/${fila.token}?nueva=1`);
   }
 
