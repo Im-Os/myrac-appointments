@@ -279,7 +279,7 @@ export function ProveedorAvisos({ children }: { children: ReactNode }) {
   return (
     <ToastCtx value={avisar}>
       {children}
-      <div className="pointer-events-none fixed inset-x-0 bottom-20 z-[60] flex flex-col items-center gap-2 px-4 lg:bottom-6">
+      <div className="pointer-events-none fixed inset-x-0 top-4 z-[60] flex flex-col items-center gap-2 px-4 lg:top-auto lg:bottom-6">
         {lista.map((t) => (
           <div
             key={t.id}

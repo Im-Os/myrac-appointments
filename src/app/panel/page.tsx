@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { CalendarPlus, Check, ChevronLeft, ChevronRight, Copy, PartyPopper, X, Clock, Warehouse, CalendarCheck2 } from "lucide-react";
 import { usePanel } from "@/components/panel-contexto";
-import { DetalleCita, SELECT_CITA, TarjetaCita, nombreVehiculo } from "@/components/citas";
+import { AvisoConfirmada, DetalleCita, SELECT_CITA, TarjetaCita, nombreVehiculo } from "@/components/citas";
+import { avisarCliente } from "@/lib/avisos";
 import { Aviso, Boton, Cargando, Tarjeta, Vacio, cx, useAvisos } from "@/components/ui";
 import {
   aInstante,
@@ -40,6 +41,7 @@ export default function Agenda() {
   const [abierta, setAbierta] = useState<CitaAgenda | null>(null);
   const [bienvenida, setBienvenida] = useState(false);
   const [verCanceladas, setVerCanceladas] = useState(false);
+  const [recienConfirmada, setRecienConfirmada] = useState<CitaAgenda | null>(null);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("bienvenida")) setBienvenida(true);
@@ -116,6 +118,8 @@ export default function Agenda() {
     const { error } = await supabase().rpc("confirmar_cita", { p_cita_id: c.id });
     if (error) return avisar(mensajeError(error), "error");
     avisar("Cita confirmada");
+    avisarCliente(c.token_cliente);
+    setRecienConfirmada({ ...c, estado: "confirmada" });
     cargar();
   }
 
@@ -311,6 +315,7 @@ export default function Agenda() {
       )}
 
       <DetalleCita cita={abierta} onCerrar={() => setAbierta(null)} onCambio={cargar} />
+      {recienConfirmada && <AvisoConfirmada abierto cita={recienConfirmada} onCerrar={() => setRecienConfirmada(null)} />}
     </div>
   );
 }

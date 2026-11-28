@@ -11,9 +11,14 @@ export async function POST(req: Request) {
     const { taller_id } = (await req.json()) as { taller_id?: string };
     if (!taller_id || !(await esDuenoDe(usuario.id, taller_id))) return Response.json({ error: "SIN_PERMISO" }, { status: 403 });
 
-    const { data: sus } = await supabaseAdmin().from("suscripciones").select("mp_preapproval_id").eq("taller_id", taller_id).maybeSingle();
-    if (!sus?.mp_preapproval_id) return Response.json({ estado: null });
-    const p = await sincronizarPreapproval(sus.mp_preapproval_id);
+    const { data: sus } = await supabaseAdmin()
+      .from("suscripciones")
+      .select("mp_preapproval_id,mp_preapproval_nuevo")
+      .eq("taller_id", taller_id)
+      .maybeSingle();
+    const id = sus?.mp_preapproval_nuevo ?? sus?.mp_preapproval_id;
+    if (!id) return Response.json({ estado: null });
+    const p = await sincronizarPreapproval(id);
     return Response.json({ estado: p.status });
   } catch (e) {
     console.error("[sincronizar]", e);

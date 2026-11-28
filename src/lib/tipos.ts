@@ -65,6 +65,7 @@ export type CitaAgenda = {
   origen: "web" | "taller";
   notas: string | null;
   creado_en: string;
+  token_cliente: string;
   cliente: { id: string; nombre: string; telefono: string; email: string | null } | null;
   vehiculo: { id: string; marca: string; modelo: string; anio: number | null; placas: string | null } | null;
   servicio: { id: string; nombre: string; tipo: TipoServicio } | null;

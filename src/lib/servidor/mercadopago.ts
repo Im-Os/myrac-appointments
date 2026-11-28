@@ -72,14 +72,30 @@ export async function sincronizarPreapproval(preapprovalId: string): Promise<Pre
 
   const db = supabaseAdmin();
   const { data: actual } = await db.from("suscripciones").select("*").eq("taller_id", tallerId).maybeSingle();
-  // Solo se acepta la suscripción que el taller inició desde la app.
-  if (actual?.mp_preapproval_id && actual.mp_preapproval_id !== p.id) return p;
-
   const cambios: Record<string, unknown> = { mp_preapproval_id: p.id, mp_estado: p.status, actualizado_en: new Date().toISOString() };
+
+  // Solo se acepta la suscripción que el taller inició desde la app.
+  if (actual?.mp_preapproval_id && actual.mp_preapproval_id !== p.id) {
+    // Cambio de plan: la nueva quedó autorizada → se cancela la anterior para no cobrar doble.
+    if (actual.mp_preapproval_nuevo === p.id && p.status === "authorized") {
+      await mp(`/preapproval/${actual.mp_preapproval_id}`, { method: "PUT", body: JSON.stringify({ status: "cancelled" }) }).catch((e) =>
+        console.error("[mp] no se pudo cancelar la suscripción anterior", e),
+      );
+      cambios.mp_preapproval_nuevo = null;
+    } else {
+      return p;
+    }
+  }
+
   if (p.status === "authorized") {
     cambios.estado = "activa";
     cambios.plan_id = planId || actual?.mp_plan_pendiente || actual?.plan_id;
     cambios.mp_plan_pendiente = null;
+    // Precio fundador: los primeros 15 talleres en suscribirse conservan su precio.
+    if (!actual?.fundador) {
+      const { count } = await db.from("suscripciones").select("taller_id", { count: "exact", head: true }).eq("fundador", true);
+      if ((count ?? 0) < 15) cambios.fundador = true;
+    }
     // Si aún tiene prueba, conserva lo que sea más largo.
     const nuevo = conGracia(p.next_payment_date);
     cambios.vence_en = actual?.vence_en && new Date(actual.vence_en) > new Date(nuevo) ? actual.vence_en : nuevo;

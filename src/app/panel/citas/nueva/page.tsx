@@ -9,6 +9,7 @@ import { ModalRecibir } from "@/components/citas";
 import { Area, Aviso, Boton, Campo, Entrada, Interruptor, Selector, Tarjeta, cx, useAvisos } from "@/components/ui";
 import { aInstante, fechaLarga, hora, hora24, hoyClave, relativoDia, sumarDias } from "@/lib/fechas";
 import { mensajeError, supabase } from "@/lib/supabase";
+import { avisarCliente } from "@/lib/avisos";
 import type { Categoria, Servicio, Slot } from "@/lib/tipos";
 
 type ClienteHallado = {
@@ -125,6 +126,12 @@ export default function NuevaCita() {
     });
     setGuardando(false);
     if (error) return setError(mensajeError(error));
+    if (!ahora) supabase()
+      .from("citas")
+      .select("token_cliente")
+      .eq("id", data as string)
+      .maybeSingle()
+      .then(({ data: t }) => avisarCliente(t?.token_cliente));
     if (ahora) {
       setRecibirId(data as string);
       return;

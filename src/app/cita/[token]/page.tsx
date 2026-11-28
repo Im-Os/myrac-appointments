@@ -8,6 +8,7 @@ import { SelectorHorario } from "@/components/selector-horario";
 import { Aviso, Boton, Cargando, Modal, Tarjeta, Vacio, cx } from "@/components/ui";
 import { diaClave, enlaceWhatsApp, fechaLarga, hora, mayus } from "@/lib/fechas";
 import { mensajeError, supabase } from "@/lib/supabase";
+import { avisarCliente } from "@/lib/avisos";
 import type { EstadoCita, TallerPublico } from "@/lib/tipos";
 
 type CitaToken = {
@@ -122,6 +123,7 @@ export default function MiCita({ params }: { params: Promise<{ token: string }> 
     const { error } = await supabase().rpc("cancelar_cita_publica", { p_token: token });
     setOcupado(false);
     if (error) return setError(mensajeError(error));
+    avisarCliente(token);
     setNueva(false);
     cargar();
   }
@@ -133,6 +135,7 @@ export default function MiCita({ params }: { params: Promise<{ token: string }> 
     const { error } = await supabase().rpc("reprogramar_cita_publica", { p_token: token, p_nuevo_inicio: nuevoInicio });
     setOcupado(false);
     if (error) return setError(mensajeError(error));
+    avisarCliente(token);
     setReprogramar(false);
     setNuevoInicio(null);
     setNueva(false);

@@ -14,20 +14,26 @@ type Suscripcion = {
   mp_preapproval_id: string | null;
   mp_estado: "pending" | "authorized" | "paused" | "cancelled" | null;
   mp_plan_pendiente: string | null;
+  mp_preapproval_nuevo: string | null;
+  fundador: boolean;
 };
-type Plan = { id: string; nombre: string; precio_mensual: number; moneda: string };
+type Plan = { id: string; nombre: string; precio_mensual: number; moneda: string; frecuencia_meses: number };
 type Pago = { id: string; monto: number | null; moneda: string | null; estado: string | null; fecha: string | null };
 
-const BENEFICIOS: Record<string, string[]> = {
-  basico: ["Página de citas con tu marca y QR", "Agenda, confirmaciones y tiempo real", "Tablero de bahías", "Equipo ilimitado"],
-  pro: ["Todo lo de Citas", "Operación del taller (próximamente)", "Integración con MYRAC OS", "Soporte prioritario"],
-};
+const BENEFICIOS = [
+  "Página de citas con tu marca y código QR",
+  "Agenda en tiempo real y confirmaciones",
+  "Aviso al cliente por WhatsApp y correo",
+  "Tablero de bahías",
+  "Equipo ilimitado",
+];
 
 const MENSAJES_API: Record<string, string> = {
   SIN_SESION: "Tu sesión terminó. Vuelve a entrar.",
   SIN_PERMISO: "Solo el dueño puede cambiar la suscripción.",
   PLAN_INVALIDO: "Ese plan no está disponible.",
   SIN_SUSCRIPCION: "No hay una suscripción activa con Mercado Pago.",
+  YA_SUSCRITO: "Ya tienes este plan.",
 };
 
 async function api(ruta: string, cuerpo: object) {
@@ -57,17 +63,25 @@ export default function SuscripcionPagina() {
   const [error, setError] = useState<string | null>(null);
   const [verificando, setVerificando] = useState(false);
   const [cancelar, setCancelar] = useState(false);
+  const [anual, setAnual] = useState(false);
+  const [lugares, setLugares] = useState<number | null>(null);
 
   const cargar = useCallback(async () => {
     const sb = supabase();
     const [s, p, h] = await Promise.all([
-      sb.from("suscripciones").select("plan_id,estado,vence_en,mp_preapproval_id,mp_estado,mp_plan_pendiente").eq("taller_id", taller.id).maybeSingle(),
-      sb.from("planes").select("id,nombre,precio_mensual,moneda").eq("activo", true).order("precio_mensual"),
+      sb
+        .from("suscripciones")
+        .select("plan_id,estado,vence_en,mp_preapproval_id,mp_estado,mp_plan_pendiente,mp_preapproval_nuevo,fundador")
+        .eq("taller_id", taller.id)
+        .maybeSingle(),
+      sb.from("planes").select("id,nombre,precio_mensual,moneda,frecuencia_meses").eq("activo", true).order("frecuencia_meses"),
       sb.from("pagos_suscripcion").select("id,monto,moneda,estado,fecha").eq("taller_id", taller.id).order("fecha", { ascending: false }).limit(12),
     ]);
     setSus((s.data as Suscripcion) ?? null);
     setPlanes((p.data ?? []) as Plan[]);
     setPagos((h.data ?? []) as Pago[]);
+    const l = await sb.rpc("lugares_fundador");
+    setLugares(typeof l.data === "number" ? l.data : null);
   }, [taller.id]);
 
   // Al volver de Mercado Pago, confirmar el estado sin esperar al webhook.
@@ -146,7 +160,7 @@ export default function SuscripcionPagina() {
     detalle = `Termina el ${fechaVence} · quedan ${diasRestantes} días.${autorizada ? " Tu primer cobro será al terminar la prueba." : ""}`;
   } else if (autorizada && vigente) {
     titulo = `Plan ${planActual?.nombre ?? ""}`.trim();
-    detalle = `Cobro automático con Mercado Pago. Próxima renovación cerca del ${fechaVence}.`;
+    detalle = `Cobro automático con Mercado Pago. Próxima renovación cerca del ${fechaVence}.${sus?.fundador ? " Tienes precio fundador." : ""}`;
   } else if (vigente && (sus?.mp_estado === "cancelled" || sus?.mp_estado === "paused")) {
     titulo = `Plan ${planActual?.nombre ?? ""}`.trim();
     detalle = `Cancelaste los cobros. Tu servicio sigue hasta el ${fechaVence}.`;
@@ -185,44 +199,69 @@ export default function SuscripcionPagina() {
         )}
       </Tarjeta>
 
-      <h2 className="mb-3 font-semibold">Planes</h2>
-      <div className="grid gap-4 md:grid-cols-2">
-        {planes.map((p) => {
-          const esActual = autorizada && sus?.plan_id === p.id;
-          return (
-            <Tarjeta key={p.id} className={cx("flex flex-col p-6", esActual && "ring-2 ring-brand")}>
-              <div className="flex items-center justify-between">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-semibold">Plan Plus</h2>
+        <div className="flex rounded-xl bg-white p-1 ring-1 ring-line">
+          {[false, true].map((a) => (
+            <button
+              key={String(a)}
+              onClick={() => setAnual(a)}
+              className={cx("rounded-lg px-3 py-1.5 text-sm font-medium", anual === a ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900")}
+            >
+              {a ? "Anual · 2 meses gratis" : "Mensual"}
+            </button>
+          ))}
+        </div>
+      </div>
+      {(() => {
+        const p = planes.find((x) => x.frecuencia_meses === (anual ? 12 : 1));
+        if (!p) return null;
+        const esActual = autorizada && sus?.plan_id === p.id;
+        const enCambio = !!sus?.mp_preapproval_nuevo && sus?.mp_plan_pendiente === p.id;
+        return (
+          <Tarjeta className={cx("grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center", esActual && "ring-2 ring-brand")}>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
                 <p className="text-lg font-semibold">{p.nombre}</p>
                 {esActual && <Insignia className="bg-brand text-brand-ink ring-brand">Tu plan</Insignia>}
+                {sus?.fundador && <Insignia className="bg-amber-50 text-amber-800 ring-amber-200">Precio fundador</Insignia>}
               </div>
-              <p className="mt-3 text-4xl font-semibold tracking-tight">
+              <p className="mt-2 text-4xl font-semibold tracking-tight">
                 ${Number(p.precio_mensual).toLocaleString("es-MX")}
-                <span className="text-base font-normal text-muted"> {p.moneda}/mes</span>
+                <span className="text-base font-normal text-muted"> {p.moneda}/{p.frecuencia_meses === 12 ? "año" : "mes"}</span>
               </p>
-              <ul className="mt-5 flex-1 space-y-2 text-[15px]">
-                {(BENEFICIOS[p.id] ?? []).map((b) => (
+              {p.frecuencia_meses === 12 && (
+                <p className="mt-1 text-sm text-emerald-700">Equivale a ${Math.round(p.precio_mensual / 12).toLocaleString("es-MX")}/mes · ahorras 2 meses</p>
+              )}
+              <ul className="mt-4 grid gap-2 text-[15px] sm:grid-cols-2">
+                {BENEFICIOS.map((b) => (
                   <li key={b} className="flex gap-2">
                     <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" /> {b}
                   </li>
                 ))}
               </ul>
-              {!esActual && (
-                <Boton
-                  className="mt-6 w-full"
-                  variante={p.id === "basico" ? "oscuro" : "primario"}
-                  icono={<CreditCard className="size-4" />}
-                  onClick={() => {
-                    setError(null);
-                    setElegido(p);
-                  }}
-                >
-                  {autorizada ? "Cambiar a este plan" : "Suscribirme"}
+            </div>
+            <div className="md:w-56">
+              {esActual ? (
+                <p className="text-center text-sm text-muted">Este es tu plan actual.</p>
+              ) : enCambio ? (
+                <p className="text-center text-sm text-muted">Cambio en proceso con Mercado Pago.</p>
+              ) : (
+                <Boton className="w-full" tam="lg" icono={<CreditCard className="size-4" />} onClick={() => { setError(null); setElegido(p); }}>
+                  {autorizada ? `Cambiar a ${p.frecuencia_meses === 12 ? "anual" : "mensual"}` : "Suscribirme"}
                 </Boton>
               )}
-            </Tarjeta>
-          );
-        })}
-      </div>
+            </div>
+          </Tarjeta>
+        );
+      })()}
+
+      {!sus?.fundador && lugares !== null && lugares > 0 && (
+        <Aviso tono="alerta" className="mt-4">
+          <span className="font-semibold">Precio fundador:</span> los primeros 15 talleres que se suscriban conservan su precio para siempre, aunque
+          suba después. Quedan {lugares} {lugares === 1 ? "lugar" : "lugares"}.
+        </Aviso>
+      )}
 
       <p className="mt-4 flex items-center gap-2 text-sm text-muted">
         <ShieldCheck className="size-4 text-emerald-600" /> Tus datos de pago los maneja Mercado Pago; MYRAC nunca ve tu tarjeta.
@@ -252,14 +291,14 @@ export default function SuscripcionPagina() {
       <Modal
         abierto={!!elegido}
         onCerrar={() => setElegido(null)}
-        titulo={autorizada ? `Cambiar al plan ${elegido?.nombre}` : `Suscribirme al plan ${elegido?.nombre}`}
+        titulo={autorizada ? `Cambiar a ${elegido?.nombre}` : `Suscribirme a ${elegido?.nombre}`}
         pie={
           <>
             <Boton variante="secundario" onClick={() => setElegido(null)}>
               Cancelar
             </Boton>
             <Boton onClick={suscribirse} cargando={ocupado === "checkout"} icono={<CreditCard className="size-4" />}>
-              {autorizada ? "Cambiar plan" : "Ir a Mercado Pago"}
+              Ir a Mercado Pago
             </Boton>
           </>
         }
@@ -269,12 +308,16 @@ export default function SuscripcionPagina() {
             <div className="flex items-baseline justify-between rounded-2xl bg-zinc-50 p-4">
               <span className="font-medium">{elegido.nombre}</span>
               <span className="text-xl font-semibold">
-                ${Number(elegido.precio_mensual).toLocaleString("es-MX")} <span className="text-sm font-normal text-muted">{elegido.moneda}/mes</span>
+                ${Number(elegido.precio_mensual).toLocaleString("es-MX")}{" "}
+                <span className="text-sm font-normal text-muted">
+                  {elegido.moneda}/{elegido.frecuencia_meses === 12 ? "año" : "mes"}
+                </span>
               </span>
             </div>
-            {autorizada ? (
-              <p className="text-sm text-muted">El nuevo monto se cobrará en tu próxima renovación con la misma tarjeta.</p>
-            ) : (
+            {autorizada && (
+              <Aviso tono="exito">Tu plan actual sigue hasta el {fechaVence}; el nuevo empieza a cobrarse a partir de ahí. Nada se cobra doble.</Aviso>
+            )}
+            {(
               <>
                 <Campo etiqueta="Correo de tu cuenta de Mercado Pago" ayuda="Debe ser el mismo con el que entrarás a Mercado Pago para pagar.">
                   <Entrada type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} />
@@ -282,7 +325,9 @@ export default function SuscripcionPagina() {
                 {sus?.estado === "prueba" && vigente && (
                   <Aviso tono="exito">No se te cobra nada hoy: el primer cobro será al terminar tu prueba, el {fechaVence}.</Aviso>
                 )}
-                <p className="text-sm text-muted">Te llevaremos a Mercado Pago para registrar tu tarjeta. Después se cobra cada mes en automático.</p>
+                <p className="text-sm text-muted">
+                  Te llevaremos a Mercado Pago para registrar tu tarjeta. Después se cobra cada {elegido.frecuencia_meses === 12 ? "año" : "mes"} en automático.
+                </p>
               </>
             )}
             {error && <Aviso tono="error">{error}</Aviso>}
