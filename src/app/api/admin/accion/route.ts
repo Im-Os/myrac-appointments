@@ -32,6 +32,8 @@ export async function POST(req: Request) {
   const admin = await exigirAdmin(req);
   if (!admin) return Response.json({ error: "SIN_PERMISO" }, { status: 403 });
   const c = (await req.json().catch(() => ({}))) as Cuerpo;
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if ((c.taller_id && !UUID.test(c.taller_id)) || (c.user_id && !UUID.test(c.user_id))) return Response.json({ error: "Datos inválidos." }, { status: 400 });
   const db = supabaseAdmin();
   const ahora = new Date();
 
