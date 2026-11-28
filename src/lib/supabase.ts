@@ -33,6 +33,8 @@ const MENSAJES: Record<string, string> = {
   USUARIO_NO_REGISTRADO: "Esa persona aún no tiene cuenta. Pídele que se registre primero.",
   ULTIMO_DUENO: "El taller necesita al menos un dueño.",
   SERVICIO_INVALIDO: "Ese servicio no pertenece al taller.",
+  LIMITE_CITAS_CLIENTE: "Ya tienes 3 citas activas en este taller. Cancela una o llama al taller para agendar otra.",
+  LIMITE_CITAS_TALLER: "El taller recibió muchas solicitudes en poco tiempo. Intenta en unos minutos o llama al taller.",
   estancias_bahia_unica: "Esa bahía ya está ocupada.",
   "Invalid login credentials": "Correo o contraseña incorrectos.",
   "User already registered": "Ya existe una cuenta con ese correo.",

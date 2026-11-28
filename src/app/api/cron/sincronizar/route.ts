@@ -17,6 +17,11 @@ export async function GET(req: Request) {
   if (!process.env.MERCADOPAGO_ACCESS_TOKEN) return Response.json({ omitido: "sin MERCADOPAGO_ACCESS_TOKEN" });
 
   const db = supabaseAdmin();
+  // Freno: sin CRON_SECRET cualquiera podría llamarla; como máximo corre una vez cada 6 horas.
+  const { data: ultima } = await db.from("tareas_programadas").select("ultima").eq("nombre", "sincronizar").maybeSingle();
+  if (ultima && Date.now() - new Date(ultima.ultima).getTime() < 6 * 3600e3) return Response.json({ omitido: "ya corrió hace poco" });
+  await db.from("tareas_programadas").upsert({ nombre: "sincronizar", ultima: new Date().toISOString() });
+
   const { data } = await db
     .from("suscripciones")
     .select("taller_id,mp_preapproval_id,mp_preapproval_nuevo,mp_estado")
