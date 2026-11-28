@@ -8,7 +8,7 @@ let admin: SupabaseClient | null = null;
 export function supabaseAdmin(): SupabaseClient {
   if (!admin) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.SUPABASE_SECRET_KEY;
+    const key = process.env.SUPABASE_SECRET_KEY?.trim();
     if (!url || !key) throw new Error("Falta SUPABASE_SECRET_KEY en el servidor");
     admin = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
   }
@@ -20,7 +20,10 @@ export async function usuarioDeLaPeticion(req: Request): Promise<{ id: string; e
   const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (!token) return null;
   const { data, error } = await supabaseAdmin().auth.getUser(token);
-  if (error || !data.user) return null;
+  if (error || !data.user) {
+    if (error) console.error("[auth] no se pudo validar la sesión:", error.message);
+    return null;
+  }
   return { id: data.user.id, email: data.user.email ?? null };
 }
 
