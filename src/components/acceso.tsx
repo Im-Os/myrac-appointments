@@ -136,9 +136,9 @@ export function FormularioAcceso({ modo }: { modo: "entrar" | "registro" }) {
         <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_70%_20%,rgba(225,29,46,0.35),transparent_70%)]" />
         <div className="relative flex h-full flex-col justify-end p-12 text-white">
           <p className="max-w-md text-3xl font-semibold leading-tight tracking-tight">
-            “La agenda llena sin saturar el taller: cada cita respeta las bahías que de verdad tenemos.”
+            La agenda llena, sin saturar el taller.
           </p>
-          <p className="mt-4 text-sm text-zinc-400">Hecho para el día a día de un taller real.</p>
+          <p className="mt-4 text-sm text-zinc-400">Cada cita respeta los cupos de recepción y las bahías que de verdad tienes.</p>
           <div className="mt-10 grid grid-cols-7 gap-1.5">
             {[1, 1, 0, 1, 1, 0, 1].map((o, i) => (
               <div key={i} className={`h-10 rounded-xl ${o ? "bg-[#E11D2E]" : "bg-white/10"}`} />

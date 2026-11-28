@@ -6,7 +6,7 @@ import { CalendarClock, CalendarPlus, Car, CheckCircle2, Clock, MessageCircle, W
 import { MarcoPublico } from "@/components/marco-publico";
 import { SelectorHorario } from "@/components/selector-horario";
 import { Aviso, Boton, Cargando, Modal, Tarjeta, Vacio, cx } from "@/components/ui";
-import { diaClave, enlaceWhatsApp, fechaLarga, hora } from "@/lib/fechas";
+import { diaClave, enlaceWhatsApp, fechaLarga, hora, mayus } from "@/lib/fechas";
 import { mensajeError, supabase } from "@/lib/supabase";
 import type { EstadoCita, TallerPublico } from "@/lib/tipos";
 
@@ -156,7 +156,7 @@ export default function MiCita({ params }: { params: Promise<{ token: string }> 
             <div className="flex items-start gap-3">
               <CalendarClock className="mt-0.5 size-5 text-brand" />
               <div>
-                <p className="text-lg font-semibold capitalize">{fechaLarga(diaClave(cita.inicio, tz))}</p>
+                <p className="text-lg font-semibold">{mayus(fechaLarga(diaClave(cita.inicio, tz)))}</p>
                 <p className="text-[15px] text-muted">Llegada a las {hora(cita.inicio, tz)}</p>
               </div>
             </div>

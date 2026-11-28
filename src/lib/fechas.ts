@@ -112,6 +112,11 @@ export function relativoDia(clave: string, tz: string): string | null {
   return null;
 }
 
+/** Primera letra en mayúscula (sin capitalizar "de", "del"…). */
+export function mayus(t: string): string {
+  return t ? t[0].toUpperCase() + t.slice(1) : t;
+}
+
 export const DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
 export function telefonoBonito(t: string | null | undefined): string {

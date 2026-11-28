@@ -18,6 +18,7 @@ import {
   mesAnio,
   nombreDia,
   numeroDia,
+  mayus,
   relativoDia,
   sumarDias,
 } from "@/lib/fechas";
@@ -141,15 +142,15 @@ export default function Agenda() {
 
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-medium capitalize text-muted">{mesAnio(dia)}</p>
+          <p className="text-sm font-medium text-muted">{mayus(mesAnio(dia))}</p>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">
             {vista === "dia" ? (
               <>
                 {relativoDia(dia, tz) && <span className="text-brand">{relativoDia(dia, tz)} · </span>}
-                <span className="capitalize">{fechaLarga(dia)}</span>
+                <span>{relativoDia(dia, tz) ? fechaLarga(dia) : mayus(fechaLarga(dia))}</span>
               </>
             ) : (
-              <span className="capitalize">
+              <span>
                 Semana del {numeroDia(inicioSemana(dia))} al {fechaCorta(sumarDias(inicioSemana(dia), 6))}
               </span>
             )}
@@ -208,8 +209,8 @@ export default function Agenda() {
                   <p className="truncate text-[15px] font-medium">
                     {nombreVehiculo(c.vehiculo)} · <span className="font-normal text-muted">{c.servicio?.nombre}</span>
                   </p>
-                  <p className="text-sm capitalize text-muted">
-                    {fechaCorta(diaClave(c.inicio, tz))}, {hora(c.inicio, tz)} · {c.cliente?.nombre}
+                  <p className="text-sm text-muted">
+                    {mayus(fechaCorta(diaClave(c.inicio, tz)))}, {hora(c.inicio, tz)} · {c.cliente?.nombre}
                   </p>
                 </button>
                 <Boton tam="sm" variante="oscuro" icono={<Check className="size-4" />} onClick={() => confirmarRapido(c)}>
@@ -292,9 +293,9 @@ function ListaPorHora({ citas, tz, onAbrir }: { citas: CitaAgenda[]; tz: string;
   return (
     <div className="divide-y divide-line">
       {[...grupos.entries()].map(([h, lista]) => (
-        <div key={h} className="flex gap-3 px-1 py-3 sm:gap-5 sm:px-2">
-          <div className="w-16 shrink-0 pt-3 text-right text-sm font-semibold tabular-nums text-zinc-500 sm:w-20">{h}</div>
-          <div className="grid flex-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        <div key={h} className="flex gap-3 px-1 py-2 sm:gap-5 sm:px-2 sm:py-3">
+          <div className="hidden w-20 shrink-0 pt-3 text-right text-sm font-semibold tabular-nums text-zinc-500 sm:block">{h}</div>
+          <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
             {lista.map((c) => (
               <TarjetaCita key={c.id} cita={c} onAbrir={() => onAbrir(c)} />
             ))}
@@ -309,10 +310,10 @@ function Indicador({ icono, titulo, valor, resaltar, href }: { icono: ReactNode;
   const cuerpo = (
     <Tarjeta className={cx("p-3.5 sm:p-4", href && "transition hover:ring-zinc-300")}>
       <div className="flex items-center gap-2 text-muted">
-        <span className={cx("grid size-7 place-items-center rounded-lg", resaltar ? "bg-amber-100 text-amber-700" : "bg-zinc-100 text-zinc-600")}>{icono}</span>
-        <span className="truncate text-xs font-medium sm:text-sm">{titulo}</span>
+        <span className={cx("hidden size-7 shrink-0 place-items-center rounded-lg sm:grid", resaltar ? "bg-amber-100 text-amber-700" : "bg-zinc-100 text-zinc-600")}>{icono}</span>
+        <span className="text-xs font-medium leading-tight sm:text-sm">{titulo}</span>
       </div>
-      <p className="mt-2 text-2xl font-semibold tabular-nums tracking-tight">{valor}</p>
+      <p className={cx("mt-1.5 text-2xl font-semibold tabular-nums tracking-tight sm:mt-2", resaltar && "text-amber-600")}>{valor}</p>
     </Tarjeta>
   );
   return href ? <Link href={href}>{cuerpo}</Link> : cuerpo;

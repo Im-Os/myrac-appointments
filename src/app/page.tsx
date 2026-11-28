@@ -54,7 +54,7 @@ export default function Inicio() {
         <section className="relative overflow-hidden">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[520px] bg-[radial-gradient(60%_60%_at_50%_0%,rgba(225,29,46,0.10),transparent_70%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_0%,rgba(225,29,46,0.10),transparent)]"
           />
           <div className="relative mx-auto max-w-6xl px-5 pb-16 pt-12 text-center sm:pt-20">
             <span className="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">

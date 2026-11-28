@@ -53,7 +53,7 @@ export function Boton({
 
 /* Formularios -------------------------------------------------------------- */
 const campoBase =
-  "w-full rounded-xl border-0 bg-white px-3.5 text-[15px] text-zinc-900 ring-1 ring-inset ring-line placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand outline-none transition disabled:bg-zinc-50 disabled:text-zinc-500";
+  "rounded-xl border-0 bg-white px-3.5 text-[15px] text-zinc-900 ring-1 ring-inset ring-line placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand outline-none transition disabled:bg-zinc-50 disabled:text-zinc-500";
 
 export function Campo({
   etiqueta,
@@ -81,12 +81,14 @@ export function Campo({
   );
 }
 
+const ancho = (c?: string) => (/(^|\s)(max-)?w-/.test(c ?? "") ? (/(^|\s)w-/.test(c ?? "") ? "" : "w-full") : "w-full");
+
 export function Entrada({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={cx(campoBase, "h-11", className)} />;
+  return <input {...props} className={cx(campoBase, ancho(className), "h-11", className)} />;
 }
 
 export function Area({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={cx(campoBase, "min-h-20 py-2.5", className)} />;
+  return <textarea {...props} className={cx(campoBase, ancho(className), "min-h-20 py-2.5", className)} />;
 }
 
 export function Selector({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
@@ -95,6 +97,7 @@ export function Selector({ className, children, ...props }: SelectHTMLAttributes
       {...props}
       className={cx(
         campoBase,
+        ancho(className),
         "h-11 appearance-none bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22%2371717a%22><path d=%22M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4Z%22/></svg>')] bg-[length:18px] bg-[right_10px_center] bg-no-repeat pr-9",
         className,
       )}

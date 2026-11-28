@@ -198,7 +198,7 @@ function TarjetaAuto({
         <Insignia className={est.clase} punto={est.punto}>
           {est.etiqueta}
         </Insignia>
-        <span className="capitalize">Entró {fechaCorta(diaClave(e.ingreso, tz))}</span>
+        <span>Entró {fechaCorta(diaClave(e.ingreso, tz))}</span>
       </div>
 
       <div className="mt-4 flex gap-2 border-t border-line pt-3">

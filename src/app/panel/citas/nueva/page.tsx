@@ -176,7 +176,7 @@ export default function NuevaCita() {
               </Campo>
               <div>
                 <p className="mb-2 text-[13px] font-medium text-zinc-700">
-                  Hora de llegada <span className="font-normal capitalize text-muted">· {relativoDia(dia, tz) ?? fechaLarga(dia)}</span>
+                  Hora de llegada <span className="font-normal text-muted">· {relativoDia(dia, tz) ?? fechaLarga(dia)}</span>
                 </p>
                 {!servicioId ? (
                   <p className="text-sm text-muted">Elige primero el servicio para ver los horarios con espacio.</p>

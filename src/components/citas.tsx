@@ -87,7 +87,7 @@ export function DetalleCita({ cita, onCerrar, onCambio }: { cita: CitaAgenda | n
         onCerrar={onCerrar}
         titulo={
           <span className="flex items-center gap-2">
-            {hora(cita.inicio, tz)} · <span className="font-normal capitalize text-muted">{fechaLarga(diaClave(cita.inicio, tz))}</span>
+            {hora(cita.inicio, tz)} · <span className="font-normal text-muted">{fechaLarga(diaClave(cita.inicio, tz))}</span>
           </span>
         }
         pie={

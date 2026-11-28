@@ -6,7 +6,7 @@ import { ArrowLeft, CalendarClock, Car, ChevronRight, Search, Wrench } from "luc
 import { MarcoPublico } from "@/components/marco-publico";
 import { SelectorHorario } from "@/components/selector-horario";
 import { Area, Aviso, Boton, Campo, Cargando, Entrada, Tarjeta, Vacio, cx } from "@/components/ui";
-import { diaClave, enlaceWhatsApp, fechaLarga, hora } from "@/lib/fechas";
+import { diaClave, enlaceWhatsApp, fechaLarga, hora, mayus } from "@/lib/fechas";
 import { mensajeError, supabase } from "@/lib/supabase";
 import type { Categoria, Servicio, TallerPublico } from "@/lib/tipos";
 
@@ -151,8 +151,8 @@ export function Reserva({ slug }: { slug: string }) {
           {idx > 1 && inicio && (
             <button onClick={() => setPaso("horario")} className="flex w-full items-center gap-3 px-4 py-3 text-left">
               <CalendarClock className="size-4 text-brand" />
-              <span className="flex-1 text-[15px] font-medium capitalize">
-                {fechaLarga(diaClave(inicio, tz))}, {hora(inicio, tz)}
+              <span className="flex-1 text-[15px] font-medium">
+                {mayus(fechaLarga(diaClave(inicio, tz)))}, {hora(inicio, tz)}
               </span>
               <span className="text-sm text-muted">Cambiar</span>
             </button>

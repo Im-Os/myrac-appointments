@@ -9,7 +9,7 @@ import { EditorHorario, editorAHorario, horarioAEditor, horarioValido } from "@/
 import type { DiaHorario } from "@/components/editor-horario";
 import { Area, Aviso, Boton, Campo, Cargando, EncabezadoPagina, Entrada, Interruptor, Numero, Selector, Tarjeta, Vacio, cx, useAvisos } from "@/components/ui";
 import { COLORES_MARCA, tintaSobre } from "@/lib/estados";
-import { aInstante, diaClave, fechaCorta, hora, hora24, hoyClave, sumarDias } from "@/lib/fechas";
+import { aInstante, diaClave, fechaCorta, hora, hora24, hoyClave, mayus, sumarDias } from "@/lib/fechas";
 import { mensajeError, supabase } from "@/lib/supabase";
 import type { Bloqueo, Horario } from "@/lib/tipos";
 
@@ -444,7 +444,7 @@ function Bloqueos() {
               <div key={b.id} className="flex items-center gap-3 px-4 py-3">
                 <CalendarOff className="size-4 text-zinc-400" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[15px] font-medium capitalize">{describir(b)}</p>
+                  <p className="text-[15px] font-medium">{mayus(describir(b))}</p>
                   {b.motivo && <p className="text-sm text-muted">{b.motivo}</p>}
                 </div>
                 <button onClick={() => quitar(b.id)} className="grid size-8 place-items-center rounded-lg text-zinc-400 hover:bg-rose-50 hover:text-rose-600" aria-label="Quitar bloqueo">

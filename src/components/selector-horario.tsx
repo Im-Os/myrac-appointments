@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CalendarX2 } from "lucide-react";
 import { Cargando, cx } from "@/components/ui";
-import { diaClave, fechaLarga, hora, hora24, hoyClave, nombreDia, numeroDia, relativoDia, sumarDias } from "@/lib/fechas";
+import { diaClave, fechaLarga, mayus, hora, hora24, hoyClave, nombreDia, numeroDia, relativoDia, sumarDias } from "@/lib/fechas";
 import { supabase } from "@/lib/supabase";
 import type { Slot } from "@/lib/tipos";
 
@@ -95,7 +95,7 @@ export function SelectorHorario({
 
       {dia && (
         <div className="mt-4">
-          <p className="mb-3 text-sm font-medium capitalize text-zinc-700">{fechaLarga(dia)}</p>
+          <p className="mb-3 text-sm font-medium text-zinc-700">{mayus(fechaLarga(dia))}</p>
           {[
             { t: "Mañana", l: manana },
             { t: "Tarde", l: tarde },
